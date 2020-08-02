@@ -1,0 +1,31 @@
+{
+  "name": "webpack-benchmark",
+  "version": "1.0.0",
+  "description": "",
+  "main": "rollup.config.js",
+  "scripts": {
+    "build": "rollup -c",
+    "dev": "rollup -c -w",
+    "start": "sirv public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/southerncross/webpack-benchmark.git"
+  },
+  "author": "lishunyang",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/southerncross/webpack-benchmark/issues"
+  },
+  "homepage": "https://github.com/southerncross/webpack-benchmark#readme",
+  "devDependencies": {
+    "@rollup/plugin-commonjs": "^14.0.0",
+    "@rollup/plugin-node-resolve": "^8.4.0",
+    "rollup": "^2.23.0",
+    "rollup-plugin-livereload": "^1.3.0",
+    "rollup-plugin-svelte": "^5.2.3",
+    "rollup-plugin-terser": "^6.1.0",
+    "sirv-cli": "^1.0.5",
+    "svelte": "^3.24.0"
+  }
+}
