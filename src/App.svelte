@@ -1,10 +1,9 @@
 <script>
   import { onMount } from 'svelte'
+  import api from '../public/api.json';
 
   export let loading = false
   export let records = []
-
-  const API_GET_BILLBOARD = 'https://service-6ta7w8ud-1300413308.bj.apigw.tencentcs.com/test/webpack-benchmark';
 
   async function fetchRecords() {
     if (loading) {
@@ -13,7 +12,7 @@
       loading = true
     }
 
-    const res = await fetch(API_GET_BILLBOARD);
+    const res = await fetch(api.get);
     records = await res.json()
     loading = false
   }
