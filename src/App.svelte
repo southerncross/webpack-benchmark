@@ -30,7 +30,7 @@
       <th>User</th>
       <th>Platform</th>
       <th>CPU</th>
-      <th>Memory</th>
+      <th>Memory (GB)</th>
       <th>Working Directory</th>
       <th>Bundle size (KB)</th>
       <th>Time cost (ms)</th>
@@ -43,7 +43,7 @@
         <td>{record.username}</td>
         <td>{record.platform}</td>
         <td>{record.cpu}</td>
-        <td>{record.memory}</td>
+        <td>{Number(record.memory / 1024).toFixed(1)}</td>
         <td>{record.projectName}</td>
         <td>{record.bundleSize}</td>
         <td>{record.compileTime}</td>
