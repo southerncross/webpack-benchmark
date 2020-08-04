@@ -28,7 +28,14 @@
       value /= 1024;
       index++;
     }
-    return value.toFixed(1) + units[index].trim() + 'B';
+
+    if (Number(value.toFixed(1)) !== Math.round(value)) {
+      value = value.toFixed(1);
+    } else {
+      value = Math.round(value);
+    }
+
+    return value + units[index].trim() + 'B';
   }
 
   export function formatTime(value) {
