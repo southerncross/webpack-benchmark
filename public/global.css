@@ -60,3 +60,15 @@ button:not(:disabled):active {
 button:focus {
 	border-color: #666;
 }
+
+tr:nth-child(2n) {
+  background-color: #efefef;
+}
+
+tr:hover {
+	background-color: #cfcfcf;
+}
+
+td {
+	padding: 10px;
+}
