@@ -103,7 +103,7 @@
       <th>Platform</th>
       <th>CPU</th>
       <th>Memory</th>
-      <th>Working Directory</th>
+      <th>Project name</th>
       <th>Bundle size</th>
       <th>Time cost</th>
       <th>Speed</th>
