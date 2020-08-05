@@ -1,27 +1,46 @@
 <script>
   import { onMount } from 'svelte';
+  import { flip } from 'svelte/animate';
+
   import api from '../public/api.json';
 
-  export let loading = false;
-  export let records = [];
+  const INITIAL_RECORDS = 'WEBPACK_BENCHMARK_INITIAL_RECORDS';
+
+  let loading = false;
+  let records = loadInitialRecords();
+  let sortKey = '';
+  let sortOrder = 1; // 1: positive order, -1: negatie order
+
+  function loadInitialRecords() {
+    try {
+      records = JSON.parse(localStorage.getItem(INITIAL_RECORDS)) || [];
+    } catch (e) {
+      return [];
+    }
+  }
+
+  function saveInitialRecords() {
+    try {
+      localStorage.setItem(INITIAL_RECORDS, JSON.stringify(records));
+    } catch (e) {
+      // do nothing.
+    }
+  }
 
   async function fetchRecords() {
-    if (loading) {
-      return
-    } else {
-      loading = true
+    if (records.length <= 0) {
+      loading = true;
     }
 
     const res = await fetch(api.get);
-    records = await res.json()
-    loading = false
+    records = await res.json();
+    records.forEach((record, index) => record.rank = index + 1);
+    loading = false;
+
+    saveInitialRecords();
   }
 
-  onMount(async () => {
-    await fetchRecords()
-  });
-
-  export function formatSize(value, initialUnit) {
+  function formatSize(value, initialUnit) {
     const units = ' KMGTPEZYB';
     let index = Math.max(units.indexOf(initialUnit), 0);
     while (value >> 10) {
@@ -38,7 +57,7 @@
     return value + units[index].trim() + 'B';
   }
 
-  export function formatTime(value) {
+  function formatTime(value) {
     if (value < 1000) {
       return value + 'ms';
     } else {
@@ -68,60 +87,120 @@
     return result;
   }
 
-  export function formatDate(value) {
+  function formatDate(value) {
+    const bases = [60, 60, 24, 30, 365];
+    const units = ['second', 'minute', 'hour', 'day', 'month', 'year']
     const date = new Date(value);
-    return (
-      date.getFullYear()
-      + '-'
-      + String(date.getMonth() + 1).padStart(2, '0')
-      + '-'
-      + String(date.getDate()).padStart(2, '0')
-      + ' '
-      + String(date.getHours()).padStart(2, '0')
-      + ':'
-      + String(date.getMinutes()).padStart(2, '0')
-      + ':'
-      + String(date.getSeconds()).padStart(2, '0')
-    );
+    const now = Date.now();
+    let diff = parseInt((now - date) / 1000);
+    let index = 0;
+    let result = 'just now';
+
+    while (diff && index < units.length) {
+      result = `${diff} ${units[index]}${diff > 1 ? 's' : ''} ago`;
+      diff = parseInt(diff / bases[index]);
+      index++;
+    }
+
+    return result;
   }
 
-  export function formatRank(value) {
-    if (value <= 3) {
-      return ['🥇', '🥈', '🥉'][value - 1];
+  function formatRank(rank) {
+    if (rank <= 3) {
+      return ['🥇', '🥈', '🥉'][rank - 1];
     } else {
-      return '#' + value;
+      return '#' + rank;
     }
   }
+
+  function sortBy(key) {
+    if (sortKey !== key) {
+      sortOrder = 1;
+    } else {
+      sortOrder *= -1;
+    }
+
+    sortKey = key;
+
+    records = records.sort((a, b) => {
+      let valueA = a[key];
+      let valueB = b[key];
+
+      if (a[key] === b[key]) {
+        valueA = a.id;
+        valueB = b.id;
+      }
+
+      if (valueA < valueB) {
+        return -1 * sortOrder;
+      } else {
+        return 1 * sortOrder;
+      }
+    });
+  }
+
+  onMount(async () => {
+    await fetchRecords();
+  });
 </script>
 
+<style>
+  .title {
+    text-align: center;
+  }
+
+  .billboard {
+    margin: 20px auto;
+  }
+
+  .th {
+    cursor: pointer;
+  }
+
+  .tr:nth-child(2n) {
+    background-color: #efefef;
+  }
+
+  .tr:hover {
+    background-color: #cfcfcf;
+  }
+
+  .td {
+    padding: 10px;
+  }
+</style>
+
 <main>
-  <h1>Webpack benchmark!</h1>
-  <table>
+  <h1 class="title">Webpack benchmark!</h1>
+  <table class="billboard">
     <thead>
-      <th>Rank</th>
-      <th>User</th>
-      <th>Platform</th>
-      <th>CPU</th>
-      <th>Memory</th>
-      <th>Project name</th>
-      <th>Bundle size</th>
-      <th>Time cost</th>
-      <th>Speed</th>
-      <th>Last uploaded date</th>
+      <th class="th" on:click="{() => sortBy('rank')}">Rank</th>
+      <th class="th" on:click="{() => sortBy('username')}">User</th>
+      <th class="th" on:click="{() => sortBy('platform')}">Platform</th>
+      <th class="th" on:click="{() => sortBy('cpu')}">CPU</th>
+      <th class="th" on:click="{() => sortBy('memory')}">Memory</th>
+      <th class="th" on:click="{() => sortBy('projectName')}">Project name</th>
+      <th class="th" on:click="{() => sortBy('bundleSize')}">Bundle size</th>
+      <th class="th" on:click="{() => sortBy('compileTime')}">Compile time</th>
+      <th class="th" on:click="{() => sortBy('compileSpeed')}">Compile Speed</th>
+      <th class="th" on:click="{() => sortBy('uploadedAt')}">Update date</th>
     </thead>
     <tbody>
-      {#each records as record, index}
-      <tr>
-        <td>{formatRank(index + 1)}</td>
-        <td>{record.username}</td>
-        <td>{record.platform}</td>
-        <td>{record.cpu}</td>
-        <td>{formatSize(record.memory, 'M')}</td>
-        <td>{record.projectName}</td>
-        <td>{formatSize(record.bundleSize)}</td>
-        <td>{formatTime(record.compileTime)}</td>
-        <td>{formatSize(record.compileSpeed)}/s</td>
-        <td>{formatDate(record.uploadedAt)}</td>
+      {#each records as record, index (record.id)}
+      <tr
+        class="tr"
+        animate:flip="{{ duration: 400 }}"
+      >
+        <td class="td">{formatRank(record.rank)}</td>
+        <td class="td">{record.username}</td>
+        <td class="td">{record.platform}</td>
+        <td class="td">{record.cpu}</td>
+        <td class="td">{formatSize(record.memory, 'M')}</td>
+        <td class="td">{record.projectName}</td>
+        <td class="td">{formatSize(record.bundleSize)}</td>
+        <td class="td">{formatTime(record.compileTime)}</td>
+        <td class="td">{formatSize(record.compileSpeed)}/s</td>
+        <td class="td">{formatDate(record.uploadedAt)}</td>
       </tr>
     {/each}
     </tbody>
