@@ -8,7 +8,7 @@
 
   let loading = false;
   let records = loadInitialRecords();
-  let sortKey = '';
+  let sortKey = 'compileSpeed';
   let sortOrder = 1; // 1: positive order, -1: negatie order
 
   function loadInitialRecords() {
@@ -168,6 +168,10 @@
   .td {
     padding: 10px;
   }
+
+  .sort {
+    font-weight: bold;
+  }
 </style>
 
 <main>
@@ -192,15 +196,15 @@
         animate:flip="{{ duration: 400 }}"
       >
         <td class="td">{formatRank(record.rank)}</td>
-        <td class="td">{record.username}</td>
-        <td class="td">{record.platform}</td>
-        <td class="td">{record.cpu}</td>
-        <td class="td">{formatSize(record.memory, 'M')}</td>
-        <td class="td">{record.projectName}</td>
-        <td class="td">{formatSize(record.bundleSize)}</td>
-        <td class="td">{formatTime(record.compileTime)}</td>
-        <td class="td">{formatSize(record.compileSpeed)}/s</td>
-        <td class="td">{formatDate(record.uploadedAt)}</td>
+        <td class="td" class:sort={sortKey === 'username'}>{record.username}</td>
+        <td class="td" class:sort={sortKey === 'platform'}>{record.platform}</td>
+        <td class="td" class:sort={sortKey === 'cpu'}>{record.cpu}</td>
+        <td class="td" class:sort={sortKey === 'memory'}>{formatSize(record.memory, 'M')}</td>
+        <td class="td" class:sort={sortKey === 'projectName'}>{record.projectName}</td>
+        <td class="td" class:sort={sortKey === 'bundleSize'}>{formatSize(record.bundleSize)}</td>
+        <td class="td" class:sort={sortKey === 'compileTime'}>{formatTime(record.compileTime)}</td>
+        <td class="td" class:sort={sortKey === 'compileSpeed' || sortKey === 'rank'}>{formatSize(record.compileSpeed)}/s</td>
+        <td class="td" class:sort={sortKey === 'uploadedAt'}>{formatDate(record.uploadedAt)}</td>
       </tr>
     {/each}
     </tbody>
