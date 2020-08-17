@@ -1,5 +1,5 @@
 {
   "upload": "https://service-6ta7w8ud-1300413308.bj.apigw.tencentcs.com/test/upload-webpack-benchmark",
   "get": "https://service-6ta7w8ud-1300413308.bj.apigw.tencentcs.com/test/webpack-benchmark",
-  "ws": "ws://service-6ta7w8ud-1300413308.bj.apigw.tencentcs.com/test/websocket"
+  "ws": "wss://service-6ta7w8ud-1300413308.bj.apigw.tencentcs.com/test/websocket"
 }
