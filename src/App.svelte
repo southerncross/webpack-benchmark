@@ -162,6 +162,12 @@
     messageDraft = '';
   }
 
+  function onKeyUp(e) {
+    if (e.key === 'Enter') {
+      submitMessage();
+    }
+  }
+
   onMount(async () => {
     document.addEventListener('visibilitychange', () => {
       if (document.visibilityState === 'hidden') {
@@ -285,7 +291,7 @@
   </table>
 
   <div class="edit-message">
-    <input value={messageDraft} on:change={(e) => messageDraft = e.target.value}/>
+    <input value={messageDraft} on:change={(e) => messageDraft = e.target.value} on:keyup={onKeyUp}/>
     <button on:click={submitMessage}>Submit</button>
   </div>
 
