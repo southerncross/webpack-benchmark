@@ -1,6 +1,9 @@
 <script>
   import { onMount } from 'svelte';
   import { flip } from 'svelte/animate';
+  import { fly } from 'svelte/transition';
+
+  import Bullet from './bullet';
 
   import api from '../public/api.json';
 
@@ -10,6 +13,10 @@
   let records = loadInitialRecords();
   let sortKey = 'compileSpeed';
   let sortOrder = 1; // 1: positive order, -1: negatie order
+
+  let bulletService = null;
+  let messageDraft = '';
+  let messages = [];
 
   function loadInitialRecords() {
     try {
@@ -139,7 +146,33 @@
     });
   }
 
+  function onWsMessage(e) {
+    messages = [...messages, {
+      id: Date.now(),
+      content: e.data,
+      top: parseInt(Math.random() * 50) + '%',
+    }];
+    setTimeout(() => {
+      messages.shift();
+    }, 16000);
+  }
+
+  function submitMessage() {
+    bulletService.send(messageDraft);
+    messageDraft = '';
+  }
+
   onMount(async () => {
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'hidden') {
+        bulletService.uninit();
+      } else if (document.visibilityState === 'visible') {
+        bulletService.init();
+      }
+    });
+    bulletService = new Bullet(api.ws, onWsMessage);
+    bulletService.init();
+
     await fetchRecords();
   });
 </script>
@@ -171,6 +204,47 @@
 
   .sort {
     font-weight: bold;
+  }
+
+  .bullet-panel {
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    pointer-events: none;
+  }
+
+  @keyframes bullet-fly {
+    0% {
+      left: 0;
+      transform: translateX(-100%);
+    }
+    100% {
+      left: 100vw;
+      transform: translateX(0);
+    }
+  }
+
+  .bullet-message {
+    position: absolute;
+    left: 100vw;
+    padding: 0 8px;
+    border-radius: 20px;
+    font-size: 20px;
+    color: #FFFFFF;
+    background-color: #242424;
+    opacity: .3;
+    white-space: nowrap;
+    animation-name: bullet-fly;
+    animation-duration: 15s;
+    animation-timing-function: linear;
+  }
+
+  .edit-message {
+    position: fixed;
+    right: 5vw;
+    bottom: 5vh;
   }
 </style>
 
@@ -209,4 +283,20 @@
     {/each}
     </tbody>
   </table>
+
+  <div class="edit-message">
+    <input value={messageDraft} on:change={(e) => messageDraft = e.target.value}/>
+    <button on:click={submitMessage}>Submit</button>
+  </div>
+
+  <div class="bullet-panel">
+    {#each messages as message, index (message.id)}
+      <div
+        class="bullet-message"
+        style={`top: ${message.top}`}
+      >
+        {message.content}
+      </div>
+    {/each}
+  </div>
 </main>
